@@ -71,6 +71,10 @@ history = model.fit(partial_x_train,
 results = model.evaluate(x_test, y_test)
 print(model.metrics_names, results)
 
+# 学習済みのネットワークを使って新しいデータで予測値を生成する
+predict_result = model.predict(x_test)
+print(predict_result)
+
 # 訓練データと検証データの損失値をプロット
 history_dict = history.history
 loss_values = history_dict["loss"]
