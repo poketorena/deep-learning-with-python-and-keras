@@ -7,3 +7,10 @@ print(train_images.ndim)
 print(train_images.shape)
 
 print(train_images.dtype)
+
+digit = train_images[4]
+
+import matplotlib.pyplot as plt
+
+plt.imshow(digit, cmap=plt.cm.binary)
+plt.show()
