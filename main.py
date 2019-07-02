@@ -27,8 +27,11 @@ output_tensor = layers.Dense(10, activation="softmax")(x)
 model = models.Model(inputs=input_tensor, outputs=output_tensor)
 
 # モデルをコンパイルする
-model.compile(optimizer="rmsprop",
-              loss="categorical_crossentropy",
+
+from keras import optimizers
+
+model.compile(optimizer=optimizers.RMSprop(lr=0.001),
+              loss="mse",
               metrics=["accuracy"])
 
 # 0-1の値に変換する
