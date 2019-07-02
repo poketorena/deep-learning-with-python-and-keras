@@ -8,7 +8,7 @@ verify_ssl = true
 [packages]
 keras = "*"
 tensorflow-gpu = "*"
-numpy = "*"
+numpy = "==1.16.1"
 matplotlib = "*"
 
 [requires]
