@@ -1,24 +1,26 @@
 from keras.datasets import imdb
+import numpy as np
+
+
+def vectorize_sequences(sequences, dimention=10000):
+    # 形状が(len(sequences), dimention)の行列を作成し、0で埋める
+    results = np.zeros((len(sequences), dimention))
+
+    for i, sequence in enumerate(sequences):
+        results[i, sequence] = 1  # results[i]のインデックスを1に設定
+
+    return results
+
 
 (train_data, train_labels), (test_data, test_labels) = imdb.load_data(num_words=10000)
 
-print(train_data[0])
-print(train_labels[0])
+# 訓練データのベクトル化
+x_train = vectorize_sequences(train_data)
+# テストデータのベクトル化
+x_test = vectorize_sequences(test_data)
 
-print(max([max(sequence) for sequence in train_data]))
+print(x_train[0])
+print(x_test[0])
 
-# word_indexは単語を整数のインデックスにマッピングする辞書
-word_index = imdb.get_word_index()
-
-# 整数のインデックスを単語にマッピング
-reverse_word_index = dict([(value, key) for (key, value) in word_index.items()])
-
-# レビューを出コード：インデックスのオフセットとして3が指定されているのは、
-# 0、1、2がそれぞれ「パディング」、「シーケンスの開始」、「不明」の
-# インデックスとして予約されていることであることに注意
-decoded_review = " ".join(
-    [reverse_word_index.get(i - 3, "?") for i in train_data[0]]
-)
-
-# デコードしたレビューの内容を表示
-print(decoded_review)
+y_train = np.asarray(train_labels).astype("float32")
+y_test = np.asarray(test_labels).astype("float32")
