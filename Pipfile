@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 keras = "*"
 tensorflow-gpu = "*"
+numpy = "*"
 
 [requires]
 python_version = "3.7"
