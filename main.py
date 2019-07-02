@@ -1,15 +1,9 @@
-import numpy as np
+from keras.datasets import mnist
 
-x = np.array([[[5, 78, 2, 34, 0],
-               [5, 78, 2, 34, 1],
-               [5, 78, 2, 34, 2]],
-              [[5, 78, 2, 34, 3],
-               [5, 78, 2, 34, 4],
-               [5, 78, 2, 34, 5]],
-              [[5, 78, 2, 34, 6],
-               [5, 78, 2, 34, 7],
-               [5, 78, 2, 34, 8]]]
-             )
+(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
 
-print(x)
-print(x.ndim)
+print(train_images.ndim)
+
+print(train_images.shape)
+
+print(train_images.dtype)
