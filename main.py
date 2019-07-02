@@ -59,13 +59,17 @@ partial_y_train = y_train[10000:]
 # モデルの訓練
 model.compile(optimizer="rmsprop",
               loss="binary_crossentropy",
-              metrics=["acc"])
+              metrics=["accuracy"])
 
 history = model.fit(partial_x_train,
                     partial_y_train,
-                    epochs=20,
+                    epochs=4,
                     batch_size=512,
                     validation_data=(x_val, y_val))
+
+# テストデータで精度を確かめる
+results = model.evaluate(x_test, y_test)
+print(model.metrics_names, results)
 
 # 訓練データと検証データの損失値をプロット
 history_dict = history.history
@@ -79,7 +83,7 @@ plt.plot(epochs, loss_values, "bo", label="Training loss")
 # "b"は"solid blue line"（青の実線）を意味する
 plt.plot(epochs, val_loss_values, "b", label="Validation loss")
 plt.title("Training and validation loss")
-plt.xlabel("Epocs")
+plt.xlabel("Epochs")
 plt.ylabel("Loss")
 plt.legend()
 plt.show()
