@@ -18,3 +18,6 @@ decoded_newswire = " ".join(
 
 # デコードしたニュースを表示
 print(decoded_newswire)
+
+# サンプルに関連付けられているラベル
+print(train_labels[10])
