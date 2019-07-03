@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 from keras.datasets import reuters
 from keras.utils.np_utils import to_categorical
@@ -83,9 +84,18 @@ partial_y_train = one_hot_train_labels1[1000:]
 # モデルの訓練
 history = model.fit(partial_x_train,
                     partial_y_train,
-                    epochs=20,
+                    epochs=8,
                     batch_size=512,
                     validation_data=(x_val, y_val))
+
+# 結果の表示
+results = model.evaluate(x_test, one_hot_test_labels1)
+print("学習結果",results)
+
+#ランダムをベースラインとした結果と比較する
+test_labels_copy=copy.copy(test_labels)
+np.random.shuffle(test_labels_copy)
+print("ランダムの場合",float(np.sum(np.array(test_labels) == np.array(test_labels_copy))) / len(test_labels))
 
 # 訓練データと検証データでの損失値をプロット
 loss = history.history["loss"]
