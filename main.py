@@ -1,5 +1,6 @@
 import numpy as np
 from keras.datasets import reuters
+from keras.utils.np_utils import to_categorical
 
 
 def vectorize_sequences(sequences, dimension=10000):
@@ -45,9 +46,16 @@ x_train = vectorize_sequences(train_data)
 x_test = vectorize_sequences(test_data)
 
 # ベクトル化された訓練ラベル
-one_hot_train_labels = to_one_hot(train_labels)
+one_hot_train_labels1 = to_one_hot(train_labels)
 
 # ベクトル化されたテストラベル
-one_hot_test_labels = to_one_hot(test_labels)
+one_hot_test_labels1 = to_one_hot(test_labels)
 
-print()
+# Kerasの機能を使ってone-hotエンコーディング（カテゴリエンコーディング）した場合
+one_hot_train_labels2 = to_categorical(train_labels)
+one_hot_test_labels2 = to_categorical(test_labels)
+
+# 自作関数でone-hotエンコーディングした結果がKerasの関数を使った場合と同じ結果になる
+# 今後はKerasの関数を使おう
+print((one_hot_test_labels1 == one_hot_test_labels2).all())
+print((one_hot_train_labels1 == one_hot_train_labels2).all())
