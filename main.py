@@ -50,10 +50,14 @@ x_train = vectorize_sequences(train_data)
 x_test = vectorize_sequences(test_data)
 
 # ベクトル化された訓練ラベル
-one_hot_train_labels1 = to_one_hot(train_labels)
+# one_hot_train_labels1 = to_one_hot(train_labels)
 
 # ベクトル化されたテストラベル
-one_hot_test_labels1 = to_one_hot(test_labels)
+# one_hot_test_labels1 = to_one_hot(test_labels)
+
+#ラベルをベクトル化しないで整数のテンソルとしてキャストする場合
+y_train=np.array(train_labels)
+y_test=np.array(test_labels)
 
 # Kerasの機能を使ってone-hotエンコーディング（カテゴリエンコーディング）した場合
 # one_hot_train_labels2 = to_categorical(train_labels)
@@ -71,15 +75,15 @@ model.add(layers.Dense(64, activation="relu"))
 model.add(layers.Dense(46, activation="softmax"))
 
 model.compile(optimizer="rmsprop",
-              loss="categorical_crossentropy",
+              loss="sparse_categorical_crossentropy",
               metrics=["accuracy"])
 
 # 検証データセットの設定
 x_val = x_train[:1000]
 partial_x_train = x_train[1000:]
 
-y_val = one_hot_train_labels1[:1000]
-partial_y_train = one_hot_train_labels1[1000:]
+y_val = y_train[:1000]
+partial_y_train = y_train[1000:]
 
 # モデルの訓練
 history = model.fit(partial_x_train,
@@ -89,7 +93,7 @@ history = model.fit(partial_x_train,
                     validation_data=(x_val, y_val))
 
 # 結果の表示
-results = model.evaluate(x_test, one_hot_test_labels1)
+results = model.evaluate(x_test, y_test)
 print("学習結果", results)
 
 # ランダムをベースラインとした結果と比較する
