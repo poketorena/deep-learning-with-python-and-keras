@@ -2,8 +2,7 @@ import copy
 import numpy as np
 from keras.datasets import reuters
 from keras.utils.np_utils import to_categorical
-from keras import models
-from keras import layers
+from keras import layers, models
 import matplotlib.pyplot as plt
 
 
@@ -70,8 +69,7 @@ one_hot_test_labels1 = to_categorical(test_labels)
 
 # モデルの作成
 model = models.Sequential()
-model.add(layers.Dense(64, activation="relu", input_shape=(10000,)))
-model.add(layers.Dense(4, activation="relu"))
+model.add(layers.Dense(46, activation="relu", input_shape=(10000,)))
 model.add(layers.Dense(46, activation="softmax"))
 
 model.compile(optimizer="rmsprop",
@@ -88,8 +86,8 @@ partial_y_train = one_hot_train_labels1[1000:]
 # モデルの訓練
 history = model.fit(partial_x_train,
                     partial_y_train,
-                    epochs=8,
-                    batch_size=128,
+                    epochs=20,
+                    batch_size=512,
                     validation_data=(x_val, y_val))
 
 # 結果の表示
