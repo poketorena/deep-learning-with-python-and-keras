@@ -90,12 +90,22 @@ history = model.fit(partial_x_train,
 
 # 結果の表示
 results = model.evaluate(x_test, one_hot_test_labels1)
-print("学習結果",results)
+print("学習結果", results)
 
-#ランダムをベースラインとした結果と比較する
-test_labels_copy=copy.copy(test_labels)
+# ランダムをベースラインとした結果と比較する
+test_labels_copy = copy.copy(test_labels)
 np.random.shuffle(test_labels_copy)
-print("ランダムの場合",float(np.sum(np.array(test_labels) == np.array(test_labels_copy))) / len(test_labels))
+print("ランダムの場合", float(np.sum(np.array(test_labels) == np.array(test_labels_copy))) / len(test_labels))
+
+# 新しいデータで予測値を生成する
+predictions = model.predict(x_test)
+
+# 各エントリの長さ（46クラスの分類問題だから46になる）
+print(predictions[0].shape)
+# このベクトルの係数を合計すると1になる（確率分布だから）
+print(np.sum(predictions[0]))
+# 最も大きなエントリが予測されたクラス（この場合は3）
+print(np.argmax(predictions[0]))
 
 # 訓練データと検証データでの損失値をプロット
 loss = history.history["loss"]
