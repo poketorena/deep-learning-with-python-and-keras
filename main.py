@@ -109,7 +109,7 @@ model.fit(train_data,
           train_targets,
           epochs=80,
           batch_size=16,
-          verbose=0)
+          verbose=1)
 
 # テストデータでの検証スコアを取得
 test_mse_score, test_mae_score = model.evaluate(test_data, test_targets)
