@@ -49,7 +49,7 @@ def smooth_curve(points, factor=0.9):
 # k分割交差検証
 k = 4
 num_val_samples = len(train_data) // k
-num_epochs = 500
+num_epochs = 80
 all_mae_histories = []
 
 for i in range(k):
