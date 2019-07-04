@@ -39,7 +39,7 @@ def build_model():
 # k分割交差検証
 k = 4
 num_val_samples = len(train_data) // k
-num_epochs = 100
+num_epochs = 500
 all_mae_histories = []
 
 for i in range(k):
