@@ -28,9 +28,8 @@ def build_model():
     # 同じモデルを複数回インスタンス化するため
     # モデルをインスタンス化するための関数を使用
     model = models.Sequential()
-    model.add(layers.Dense(64, activation="relu",
-                           input_shape=(train_data.shape[1],)))
-    model.add(layers.Dense(64, activation="relu"))
+    model.add(layers.Dense(64, activation="relu", input_shape=(train_data.shape[1],), kernel_initializer="he_uniform"))
+    model.add(layers.Dense(64, activation="relu", kernel_initializer="he_uniform"))
     model.add(layers.Dense(1))
     model.compile(optimizer="rmsprop", loss="mse", metrics=["mae"])
     return model
