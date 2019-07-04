@@ -28,6 +28,7 @@ def build_model():
     # 同じモデルを複数回インスタンス化するため
     # モデルをインスタンス化するための関数を使用
     model = models.Sequential()
+    # HEの初期値にすると結果が0.03良くなる？1回しか実行していないので誤差かもしれない。
     model.add(layers.Dense(64, activation="relu", input_shape=(train_data.shape[1],), kernel_initializer="he_uniform"))
     model.add(layers.Dense(64, activation="relu", kernel_initializer="he_uniform"))
     model.add(layers.Dense(1))
