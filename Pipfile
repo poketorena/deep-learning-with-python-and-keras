@@ -10,7 +10,6 @@ keras = "*"
 tensorflow-gpu = "*"
 numpy = "==1.16.1"
 matplotlib = "*"
-plt = "*"
 
 [requires]
 python_version = "3.7"

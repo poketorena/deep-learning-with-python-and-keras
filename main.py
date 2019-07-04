@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from keras import models
 from keras.datasets import boston_housing
 from keras import layers
@@ -39,7 +40,7 @@ def build_model():
 k = 4
 num_val_samples = len(train_data) // k
 num_epochs = 100
-all_scores = []
+all_mae_histories = []
 
 for i in range(k):
     print("processing fold #", i)
@@ -63,13 +64,25 @@ for i in range(k):
     # Kerasモデルを構築（コンパイル済み）
     model = build_model()
 
-    # モデルをサイレントモード（verbose=0で適合する。これにより標準出力に出てくるテキストが少なくなる）
-    model.fit(partial_train_data, partial_train_targets, epochs=num_epochs, batch_size=1, verbose=1)
+    # モデルを適合する
+    history = model.fit(partial_train_data,
+                        partial_train_targets,
+                        validation_data=(val_data, val_targets),
+                        epochs=num_epochs,
+                        batch_size=1,
+                        verbose=1)
 
-    # モデルを検証データで評価
-    val_mse, val_mae = model.evaluate(val_data, val_targets, verbose=1)
-    all_scores.append(val_mae)
+    # maeを記録する
+    mae_history = history.history["val_mean_absolute_error"]
+    all_mae_histories.append(mae_history)
 
-# 結果の表示
-print(all_scores)
-print(np.mean(all_scores))
+# k分割交差検証の平均スコアの履歴を構築
+average_mae_history = [
+    np.mean([x[i] for x in all_mae_histories]) for i in range(num_epochs)
+]
+
+# 検証スコアのプロット
+plt.plot(range(1, len(average_mae_history) + 1), average_mae_history)
+plt.xlabel("Epochs")
+plt.ylabel("Validation MAE")
+plt.show()
