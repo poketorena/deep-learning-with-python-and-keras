@@ -99,3 +99,19 @@ plt.plot(range(1, len(smooth_mae_history) + 1), smooth_mae_history)
 plt.xlabel("Epochs")
 plt.ylabel("Validation MAE")
 plt.show()
+
+# 最終的なモデルの訓練
+# コンパイル済みの新しいモデルを取得
+model = build_model()
+
+# データ全体を使って訓練
+model.fit(train_data,
+          train_targets,
+          epochs=80,
+          batch_size=16,
+          verbose=0)
+
+# テストデータでの検証スコアを取得
+test_mse_score, test_mae_score = model.evaluate(test_data, test_targets)
+
+print(f"test_mse_score:{test_mse_score}  test_mae_score:{test_mae_score}")
