@@ -1,117 +1,111 @@
+from keras.datasets import imdb
+from keras import models, optimizers, losses, metrics
+from keras import layers
 import numpy as np
 import matplotlib.pyplot as plt
-from keras import models
-from keras.datasets import boston_housing
-from keras import layers
-
-(train_data, train_targets), (test_data, test_targets) = boston_housing.load_data()
-
-# 訓練データの形状
-print(train_data.shape)
-# テストデータの形状
-print(test_data.shape)
-# 住宅価格（単位は1000ドル）
-# 住宅価格は10000ドルから50000ドルの間（1970年台は不動産バブルだから住宅が安かった！）
-print(train_targets)
-
-# データの正規化
-mean = train_data.mean(axis=0)
-train_data -= mean
-std = train_data.std(axis=0)
-train_data /= std
-
-test_data -= mean
-test_data /= std
 
 
-def build_model():
-    # 同じモデルを複数回インスタンス化するため
-    # モデルをインスタンス化するための関数を使用
-    model = models.Sequential()
-    # HEの初期値にすると結果が0.03良くなる？1回しか実行していないので誤差かもしれない。
-    model.add(layers.Dense(64, activation="relu", input_shape=(train_data.shape[1],), kernel_initializer="he_uniform"))
-    model.add(layers.Dense(64, activation="relu", kernel_initializer="he_uniform"))
-    model.add(layers.Dense(1))
-    model.compile(optimizer="rmsprop", loss="mse", metrics=["mae"])
-    return model
+def vectorize_sequences(sequences, dimention=10000):
+    # 形状が(len(sequences), dimention)の行列を作成し、0で埋める
+    results = np.zeros((len(sequences), dimention))
+
+    for i, sequence in enumerate(sequences):
+        results[i, sequence] = 1  # results[i]のインデックスを1に設定
+
+    return results
 
 
-def smooth_curve(points, factor=0.9):
-    smoothed_points = []
-    for point in points:
-        if smoothed_points:
-            previous = smoothed_points[-1]
-            smoothed_points.append(previous * factor + point * (1 - factor))
-        else:
-            smoothed_points.append(point)
-    return smoothed_points
+(train_data, train_labels), (test_data, test_labels) = imdb.load_data(num_words=10000)
 
+# 訓練データのベクトル化
+x_train = vectorize_sequences(train_data)
+# テストデータのベクトル化
+x_test = vectorize_sequences(test_data)
 
-# k分割交差検証
-k = 4
-num_val_samples = len(train_data) // k
-num_epochs = 80
-all_mae_histories = []
+print(x_train[0])
+print(x_test[0])
 
-for i in range(k):
-    print("processing fold #", i)
+y_train = np.asarray(train_labels).astype("float32")
+y_test = np.asarray(test_labels).astype("float32")
 
-    # 検証データの準備：フォールドiのデータ
-    val_data = train_data[i * num_val_samples:(i + 1) * num_val_samples]
-    val_targets = train_targets[i * num_val_samples:(i + 1) * num_val_samples]
+model = models.Sequential()
+model.add(layers.Dense(16, activation="relu", input_shape=(10000,)))
+model.add(layers.Dropout(0.5))
+model.add(layers.Dense(16, activation="relu"))
+model.add(layers.Dropout(0.5))
+model.add(layers.Dense(1, activation="sigmoid"))
 
-    # 訓練データの準備：残りのフォールドのデータ
-    partial_train_data = np.concatenate(
-        [train_data[:i * num_val_samples],
-         train_data[(i + 1) * num_val_samples:]],
-        axis=0
-    )
-    partial_train_targets = np.concatenate(
-        [train_targets[:i * num_val_samples],
-         train_targets[(i + 1) * num_val_samples:]],
-        axis=0
-    )
+# 最も単純なモデルのコンパイル
+# model.compile(optimizer="rmsprop",
+#               loss="binary_crossentropy",
+#               metrics=["accuracy"])
 
-    # Kerasモデルを構築（コンパイル済み）
-    model = build_model()
+# オプティマイザの設定
+#
+# オプティマイザのパラメータを指定したい場合はoptimizerパラメータに
+# 引数としてオプティマイザクラスのインスタンスを設定する
+#
+# 独自の損失関数や指標関数を使用したい場合はlossパラメータか
+# metricsパラメータに引数として関数オブジェクトを指定する
+# model.compile(optimizer=optimizers.RMSprop(lr=0.001),
+#               loss=losses.binary_crossentropy,
+#               metrics=[metrics.binary_accuracy])
 
-    # モデルを適合する
-    history = model.fit(partial_train_data,
-                        partial_train_targets,
-                        validation_data=(val_data, val_targets),
-                        epochs=num_epochs,
-                        batch_size=1,
-                        verbose=1)
+# 検証データセットの設定
+x_val = x_train[:10000]
+partial_x_train = x_train[10000:]
 
-    # maeを記録する
-    mae_history = history.history["val_mean_absolute_error"]
-    all_mae_histories.append(mae_history)
+y_val = y_train[:10000]
+partial_y_train = y_train[10000:]
 
-# k分割交差検証の平均スコアの履歴を構築
-average_mae_history = [
-    np.mean([x[i] for x in all_mae_histories]) for i in range(num_epochs)
-]
+# モデルの訓練
+model.compile(optimizer="rmsprop",
+              loss="binary_crossentropy",
+              metrics=["accuracy"])
 
-# 検証スコアのプロット
-smooth_mae_history = smooth_curve(average_mae_history[10:])
+history = model.fit(partial_x_train,
+                    partial_y_train,
+                    epochs=7,
+                    batch_size=512,
+                    validation_data=(x_val, y_val))
 
-plt.plot(range(1, len(smooth_mae_history) + 1), smooth_mae_history)
+# テストデータで精度を確かめる
+results = model.evaluate(x_test, y_test)
+print(model.metrics_names, results)
+
+# 学習済みのネットワークを使って新しいデータで予測値を生成する
+predict_result = model.predict(x_test)
+print(predict_result)
+
+# 訓練データと検証データの損失値をプロット
+history_dict = history.history
+loss_values = history_dict["loss"]
+val_loss_values = history_dict["val_loss"]
+
+epochs = range(1, len(loss_values) + 1)
+
+# "bo"は"blue dot"（青のドット）を意味する
+plt.plot(epochs, loss_values, "bo", label="Training loss")
+# "b"は"solid blue line"（青の実線）を意味する
+plt.plot(epochs, val_loss_values, "b", label="Validation loss")
+plt.title("Training and validation loss")
 plt.xlabel("Epochs")
-plt.ylabel("Validation MAE")
+plt.ylabel("Loss")
+plt.legend()
 plt.show()
 
-# 最終的なモデルの訓練
-# コンパイル済みの新しいモデルを取得
-model = build_model()
+# 訓練データと検証データでの正解率をプロット
 
-# データ全体を使って訓練
-model.fit(train_data,
-          train_targets,
-          epochs=80,
-          batch_size=16,
-          verbose=1)
+# 図を消去
+plt.clf()
 
-# テストデータでの検証スコアを取得
-test_mse_score, test_mae_score = model.evaluate(test_data, test_targets)
+acc = history_dict["acc"]
+val_acc = history_dict["val_acc"]
 
-print(f"test_mse_score:{test_mse_score}  test_mae_score:{test_mae_score}")
+plt.plot(epochs, acc, "bo", label="Training acc")
+plt.plot(epochs, val_acc, "b", label="Validation acc")
+plt.title("Training and validation accuracy")
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.legend()
+plt.show()
