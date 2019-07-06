@@ -1,66 +1,92 @@
-from keras.models import Model
-from keras import Input
-from keras.datasets import mnist
-from keras import layers
-from keras.utils import to_categorical
+import os, shutil
 
-(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
+# 元のデータセットを展開したディレクトリへのパス
+original_dataset_dir = "./dogs-vs-cats/train"
 
-train_images = train_images.reshape((60000, 28, 28, 1))
-train_images = train_images.astype("float32") / 255
+# より小さなデータセットを格納するディレクトリへのパス
+base_dir = "./cats-and-dogs-small"
+os.mkdir(base_dir)
 
-test_images = test_images.reshape((10000, 28, 28, 1))
-test_images = test_images.astype("float32") / 255
+# 訓練データセット、検証データセット、テストデータセットを配置するディレクトリ
+train_dir = os.path.join(base_dir, "train")
+os.mkdir(train_dir)
+validation_dir = os.path.join(base_dir, "validation")
+os.mkdir(validation_dir)
+test_dir = os.path.join(base_dir, "test")
+os.mkdir(test_dir)
 
-train_labels = to_categorical(train_labels)
-test_labels = to_categorical(test_labels)
+# 訓練用の猫の画像を配置するディレクトリ
+train_cats_dir = os.path.join(train_dir, "cats")
+os.mkdir(train_cats_dir)
 
-# model = models.Sequential()
-# model.add(layers.Conv2D(32, (3, 3), activation="relu", input_shape=(28, 28, 1)))
-# model.add(layers.MaxPool2D((2, 2)))
-# model.add(layers.Conv2D(64, (3, 3), activation="relu"))
-# model.add(layers.MaxPool2D((2, 2)))
-# model.add(layers.Conv2D(64, (3, 3), activation="relu"))
-# model.add(layers.Flatten())
-# model.add(layers.Dense(64, activation="relu"))
-# model.add(layers.Dense(10, activation="softmax"))
+# 訓練用の犬の画像を配置するディレクトリ
+train_dogs_dir = os.path.join(train_dir, "dogs")
+os.mkdir(train_dogs_dir)
 
-# モデルをKeras Functional APIで書いた場合
-input_tensor = Input(shape=(28, 28, 1))
+# 検証用の猫の画像を配置するディレクトリ
+validation_cats_dir = os.path.join(validation_dir, "cats")
+os.mkdir(validation_cats_dir)
 
-x = layers.Conv2D(filters=32,
-                  kernel_size=(3, 3),
-                  activation="relu")(input_tensor)
+# 検証用の犬の画像を配置するディレクトリ
+validation_dogs_dir = os.path.join(validation_dir, "dogs")
+os.mkdir(validation_dogs_dir)
 
-x = layers.MaxPool2D(pool_size=(2, 2))(x)
+# テスト用の猫の画像を配置するディレクトリ
+test_cats_dir = os.path.join(test_dir, "cats")
+os.mkdir(test_cats_dir)
 
-x = layers.Conv2D(filters=64,
-                  kernel_size=(3, 3),
-                  activation="relu")(x)
+# テスト用の犬の画像を配置するディレクトリ
+test_dogs_dir = os.path.join(test_dir, "dogs")
+os.mkdir(test_dogs_dir)
 
-x = layers.MaxPool2D(pool_size=(2, 2))(x)
+# 最初の1000個の猫画像をtrain_cats_dirにコピー
+fnames = [f"cat.{i}.jpg" for i in range(1000)]
+for fname in fnames:
+    src = os.path.join(original_dataset_dir, fname)
+    dst = os.path.join(train_cats_dir, fname)
+    shutil.copyfile(src, dst)
 
-x = layers.Conv2D(filters=64,
-                  kernel_size=(3, 3),
-                  activation="relu")(x)
+# 次の500個の猫画像をvalidation_cats_dirにコピー
+fnames = [f"cat.{i}.jpg" for i in range(1000, 1500)]
+for fname in fnames:
+    src = os.path.join(original_dataset_dir, fname)
+    dst = os.path.join(validation_cats_dir, fname)
+    shutil.copyfile(src, dst)
 
-x = layers.Flatten()(x)
+# 次の500個の猫画像をtest_cats_dirにコピー
+fnames = [f"cat.{i}.jpg" for i in range(1500, 2000)]
+for fname in fnames:
+    src = os.path.join(original_dataset_dir, fname)
+    dst = os.path.join(test_cats_dir, fname)
+    shutil.copyfile(src, dst)
 
-x = layers.Dense(units=64,
-                 activation="relu")(x)
+# 最初の1000個の猫画像をtrain_dogs_dirにコピー
+fnames = [f"cat.{i}.jpg" for i in range(1000)]
+for fname in fnames:
+    src = os.path.join(original_dataset_dir, fname)
+    dst = os.path.join(train_dogs_dir, fname)
+    shutil.copyfile(src, dst)
 
-output_tensor = layers.Dense(units=10,
-                             activation="softmax")(x)
+# 次の500個の猫画像をvalidation_dogs_dirにコピー
+fnames = [f"cat.{i}.jpg" for i in range(1000, 1500)]
+for fname in fnames:
+    src = os.path.join(original_dataset_dir, fname)
+    dst = os.path.join(validation_dogs_dir, fname)
+    shutil.copyfile(src, dst)
 
-model = Model(input_tensor, output_tensor)
+# 次の500個の猫画像をtest_dogs_dirにコピー
+fnames = [f"cat.{i}.jpg" for i in range(1500, 2000)]
+for fname in fnames:
+    src = os.path.join(original_dataset_dir, fname)
+    dst = os.path.join(test_dogs_dir, fname)
+    shutil.copyfile(src, dst)
 
-model.compile(optimizer="rmsprop",
-              loss="categorical_crossentropy",
-              metrics=["accuracy"])
+# コピーが成功したかチェックする（健全性チェック）
+print("total training cat images:", len(os.listdir(train_cats_dir)))
+print("total training dog images:", len(os.listdir(train_dogs_dir)))
 
-print(model.summary())
+print("total validation cat images:", len(os.listdir(validation_cats_dir)))
+print("total validation dog images:", len(os.listdir(validation_dogs_dir)))
 
-model.fit(train_images, train_labels, epochs=5, batch_size=64)
-
-test_loss, test_acc = model.evaluate(test_images, test_labels)
-print(f"test_loss:{test_loss}  test_acc:{test_acc}")
+print("total test cat images:", len(os.listdir(test_cats_dir)))
+print("total test dog images:", len(os.listdir(test_dogs_dir)))
