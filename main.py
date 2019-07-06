@@ -1,4 +1,6 @@
 import os, shutil
+from keras import layers, optimizers
+from keras import models
 
 # 元のデータセットを展開したディレクトリへのパス
 original_dataset_dir = "./dogs-vs-cats/train"
@@ -90,3 +92,28 @@ print("total validation dog images:", len(os.listdir(validation_dogs_dir)))
 
 print("total test cat images:", len(os.listdir(test_cats_dir)))
 print("total test dog images:", len(os.listdir(test_dogs_dir)))
+
+model = models.Sequential()
+
+model.add(layers.Conv2D(32, (3, 3), activation="relu", input_shape=(150, 150, 3)))
+model.add(layers.MaxPooling2D((2, 2)))
+
+model.add(layers.Conv2D(64, (3, 3), activation="relu"))
+model.add(layers.MaxPooling2D((2, 2)))
+
+model.add(layers.Conv2D(128, (3, 3), activation="relu"))
+model.add(layers.MaxPooling2D((2, 2)))
+
+model.add(layers.Conv2D(128, (3, 3), activation="relu"))
+model.add(layers.MaxPooling2D((2, 2)))
+
+model.add(layers.Flatten())
+
+model.add(layers.Dense(512, activation="relu"))
+model.add(layers.Dense(1, activation="sigmoid"))
+
+print(model.summary())
+
+model.compile(loss="binary_crossentropy",
+              optimizer=optimizers.RMSprop(lr=1e-4),
+              metrics=["acc"])
