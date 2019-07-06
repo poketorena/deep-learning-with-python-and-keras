@@ -113,6 +113,8 @@ model.add(layers.MaxPooling2D((2, 2)))
 
 model.add(layers.Flatten())
 
+model.add(layers.Dropout(0.5))
+
 model.add(layers.Dense(512, activation="relu"))
 model.add(layers.Dense(1, activation="sigmoid"))
 
@@ -158,19 +160,20 @@ for batch in train_datagen.flow(x, batch_size=1):
 
 plt.show()
 
+# 検証データは水増しすべきではないことに注意
 test_datagen = ImageDataGenerator(rescale=1. / 255)
 
 train_generator = train_datagen.flow_from_directory(
     train_dir,  # ターゲットディレクトリ
     target_size=(150, 150),  # すべての画像サイズを150x150に変更
-    batch_size=20,  # バッチサイズ
+    batch_size=32,  # バッチサイズ
     class_mode="binary"  # binary_crossentropyを使用するため、二値のラベルが必要
 )
 
 validation_generator = test_datagen.flow_from_directory(
     validation_dir,  # ターゲットディレクトリ
     target_size=(150, 150),  # すべての画像サイズを150x150に変更
-    batch_size=20,  # バッチサイズ
+    batch_size=32,  # バッチサイズ
     class_mode="binary"  # binary_crossentropyを使用するため、二値のラベルが必要
 )
 
@@ -185,12 +188,12 @@ for data_batch, labels_batch in train_generator:
 # バッチジェネレータを使ってモデルを適合
 history = model.fit_generator(generator=train_generator,
                               steps_per_epoch=100,
-                              epochs=30,
+                              epochs=100,
                               validation_data=validation_generator,
                               validation_steps=50)
 
 # モデルを保存
-model.save("cats_and_dogs_small_1.h5")
+model.save("cats_and_dogs_small_2.h5")
 
 # 訓練時の損失値を正解率をプロット
 acc = history.history["acc"]
