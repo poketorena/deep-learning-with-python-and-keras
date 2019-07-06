@@ -444,3 +444,6 @@ modules.xml
 # Pyre type checker
 
 # End of https://www.gitignore.io/api/flask,python,django,pycharm,pycharm+iml,pycharm+all,jupyternotebooks
+
+# Additioanl .gitignore
+/dogs-vs-cats/
