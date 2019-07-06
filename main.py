@@ -1,87 +1,90 @@
 import os, shutil
-from keras import layers, optimizers
+from keras import layers
+from keras import optimizers
 from keras import models
+from keras.preprocessing.image import ImageDataGenerator
+import matplotlib.pyplot as plt
 
 # 元のデータセットを展開したディレクトリへのパス
 original_dataset_dir = "./dogs-vs-cats/train"
 
 # より小さなデータセットを格納するディレクトリへのパス
 base_dir = "./cats-and-dogs-small"
-os.mkdir(base_dir)
+# os.mkdir(base_dir)
 
 # 訓練データセット、検証データセット、テストデータセットを配置するディレクトリ
 train_dir = os.path.join(base_dir, "train")
-os.mkdir(train_dir)
+# os.mkdir(train_dir)
 validation_dir = os.path.join(base_dir, "validation")
-os.mkdir(validation_dir)
+# os.mkdir(validation_dir)
 test_dir = os.path.join(base_dir, "test")
-os.mkdir(test_dir)
+# os.mkdir(test_dir)
 
 # 訓練用の猫の画像を配置するディレクトリ
 train_cats_dir = os.path.join(train_dir, "cats")
-os.mkdir(train_cats_dir)
+# os.mkdir(train_cats_dir)
 
 # 訓練用の犬の画像を配置するディレクトリ
 train_dogs_dir = os.path.join(train_dir, "dogs")
-os.mkdir(train_dogs_dir)
+# os.mkdir(train_dogs_dir)
 
 # 検証用の猫の画像を配置するディレクトリ
 validation_cats_dir = os.path.join(validation_dir, "cats")
-os.mkdir(validation_cats_dir)
+# os.mkdir(validation_cats_dir)
 
 # 検証用の犬の画像を配置するディレクトリ
 validation_dogs_dir = os.path.join(validation_dir, "dogs")
-os.mkdir(validation_dogs_dir)
+# os.mkdir(validation_dogs_dir)
 
 # テスト用の猫の画像を配置するディレクトリ
 test_cats_dir = os.path.join(test_dir, "cats")
-os.mkdir(test_cats_dir)
+# os.mkdir(test_cats_dir)
 
 # テスト用の犬の画像を配置するディレクトリ
 test_dogs_dir = os.path.join(test_dir, "dogs")
-os.mkdir(test_dogs_dir)
+# os.mkdir(test_dogs_dir)
 
 # 最初の1000個の猫画像をtrain_cats_dirにコピー
 fnames = [f"cat.{i}.jpg" for i in range(1000)]
 for fname in fnames:
     src = os.path.join(original_dataset_dir, fname)
     dst = os.path.join(train_cats_dir, fname)
-    shutil.copyfile(src, dst)
+    # shutil.copyfile(src, dst)
 
 # 次の500個の猫画像をvalidation_cats_dirにコピー
 fnames = [f"cat.{i}.jpg" for i in range(1000, 1500)]
 for fname in fnames:
     src = os.path.join(original_dataset_dir, fname)
     dst = os.path.join(validation_cats_dir, fname)
-    shutil.copyfile(src, dst)
+    # shutil.copyfile(src, dst)
 
 # 次の500個の猫画像をtest_cats_dirにコピー
 fnames = [f"cat.{i}.jpg" for i in range(1500, 2000)]
 for fname in fnames:
     src = os.path.join(original_dataset_dir, fname)
     dst = os.path.join(test_cats_dir, fname)
-    shutil.copyfile(src, dst)
+    # shutil.copyfile(src, dst)
 
 # 最初の1000個の猫画像をtrain_dogs_dirにコピー
 fnames = [f"cat.{i}.jpg" for i in range(1000)]
 for fname in fnames:
     src = os.path.join(original_dataset_dir, fname)
     dst = os.path.join(train_dogs_dir, fname)
-    shutil.copyfile(src, dst)
+    # shutil.copyfile(src, dst)
 
 # 次の500個の猫画像をvalidation_dogs_dirにコピー
 fnames = [f"cat.{i}.jpg" for i in range(1000, 1500)]
 for fname in fnames:
     src = os.path.join(original_dataset_dir, fname)
     dst = os.path.join(validation_dogs_dir, fname)
-    shutil.copyfile(src, dst)
+    # shutil.copyfile(src, dst)
 
 # 次の500個の猫画像をtest_dogs_dirにコピー
 fnames = [f"cat.{i}.jpg" for i in range(1500, 2000)]
 for fname in fnames:
     src = os.path.join(original_dataset_dir, fname)
     dst = os.path.join(test_dogs_dir, fname)
-    shutil.copyfile(src, dst)
+    # shutil.copyfile(src, dst)
 
 # コピーが成功したかチェックする（健全性チェック）
 print("total training cat images:", len(os.listdir(train_cats_dir)))
@@ -117,3 +120,29 @@ print(model.summary())
 model.compile(loss="binary_crossentropy",
               optimizer=optimizers.RMSprop(lr=1e-4),
               metrics=["acc"])
+
+# 全ての画像を1/255でスケーリング
+train_datagen = ImageDataGenerator(rescale=1. / 255)
+test_datagen = ImageDataGenerator(rescale=1. / 255)
+
+train_generator = train_datagen.flow_from_directory(
+    train_dir,  # ターゲットディレクトリ
+    target_size=(150, 150),  # すべての画像サイズを150x150に変更
+    batch_size=20,  # バッチサイズ
+    class_mode="binary"  # binary_crossentropyを使用するため、二値のラベルが必要
+)
+
+validation_generator = test_datagen.flow_from_directory(
+    validation_dir,  # ターゲットディレクトリ
+    target_size=(150, 150),  # すべての画像サイズを150x150に変更
+    batch_size=20,  # バッチサイズ
+    class_mode="binary"  # binary_crossentropyを使用するため、二値のラベルが必要
+)
+
+# ImageDataGeneratorのテスト
+for data_batch, labels_batch in train_generator:
+    print("data batch shape:", data_batch.shape)
+    print("labels batch shape:", labels_batch.shape)
+    plt.imshow(data_batch[0])
+    plt.show()
+    break
