@@ -184,3 +184,52 @@ plt.title("Training and validation loss")
 plt.legend()
 
 plt.show()
+
+# 最初から特定の層までを全て凍結
+conv_base.trainable = True
+
+set_trainable = False
+for layer in conv_base.layers:
+    if layer.name == "block5_conv1":
+        set_trainable = True
+    if set_trainable:
+        layer.trainable = True
+    else:
+        layer.trainable = False
+
+print(model.summary())
+
+# モデルのファインチューニング
+model.compile(loss="binary_crossentropy",
+              optimizer=optimizers.RMSprop(lr=1e-5),
+              metrics=["acc"])
+
+history = model.fit_generator(train_generator,
+                              steps_per_epoch=100,
+                              epochs=100,
+                              validation_data=validation_generator,
+                              validation_steps=50)
+
+# 訓練時の損失値を正解率をプロット
+acc = history.history["acc"]
+val_acc = history.history["val_acc"]
+loss = history.history["loss"]
+val_loss = history.history["val_loss"]
+
+epochs = range(len(acc))
+
+# 正解率をプロット
+plt.plot(epochs, acc, "bo", label="Training acc")
+plt.plot(epochs, val_acc, "b", label="Validation acc")
+plt.title("Training and validation accuracy")
+plt.legend()
+
+plt.figure()
+
+# 損失値をプロット
+plt.plot(epochs, loss, "bo", label="Training loss")
+plt.plot(epochs, val_loss, "b", label="Validation loss")
+plt.title("Training and validation loss")
+plt.legend()
+
+plt.show()
