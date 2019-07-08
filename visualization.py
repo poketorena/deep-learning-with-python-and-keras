@@ -51,3 +51,48 @@ plt.show()
 
 plt.matshow(first_layer_activation[0, :, :, 30], cmap="viridis")
 plt.show()
+
+# 中間層の活性化ごとにすべてのチャネルを可視化
+# プロットの一部として使用する層の名前
+layer_names = []
+for layer in model.layers[:8]:
+    layer_names.append(layer.name)
+
+images_per_row = 16
+
+# 特徴マップを表示
+for layer_name, layer_activation in zip(layer_names, activations):
+    # 特徴マップに含まれている特徴量の数
+    n_features = layer_activation.shape[-1]
+
+    # 特徴マップの形状(1, size, size, n_features)
+    size = layer_activation.shape[1]
+
+    # この行列で活性化のチャネルをタイル表示
+    n_cols = n_features // images_per_row
+    display_grid = np.zeros((size * n_cols, images_per_row * size))
+
+    # 各フィルタを1つの大きな水平グリッドタイルで表示
+    for col in range(n_cols):
+        for row in range(images_per_row):
+            channel_image = layer_activation[0, :, :, col * images_per_row + row]
+
+            # 特徴量の見た目をよくするための後処理
+            channel_image -= channel_image.mean()
+            channel_image /= channel_image.std()
+            channel_image *= 64
+            channel_image += 128
+            channel_image = np.clip(channel_image, 0, 255).astype("uint8")
+            display_grid[col * size:(col + 1) * size, row * size:(row + 1) * size] = channel_image
+
+    # グリッドを表示
+    scale = 1. / size
+    plt.figure(figsize=(scale * display_grid.shape[1], scale * display_grid.shape[0]))
+    plt.title(layer_name)
+    plt.grid(False)
+    plt.imshow(display_grid, aspect="auto", cmap="viridis")
+
+plt.show()
+
+predict_result = model.predict(img_tensor)
+print()
