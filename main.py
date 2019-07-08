@@ -255,6 +255,6 @@ test_generator = test_datagen.flow_from_directory(
     class_mode="binary"
 )
 
-test_loss = test_acc = model.evaluate_generator(test_generator, steps=50)
+test_loss, test_acc = model.evaluate_generator(test_generator, steps=50)
 print(f"test loss: {test_loss}")
 print(f"test acc: {test_acc}")
