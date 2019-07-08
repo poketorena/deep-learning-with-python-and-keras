@@ -241,13 +241,13 @@ plt.legend()
 plt.figure()
 
 plt.plot(epochs, smooth_curve(loss), "bo", label="Smoothed training loss")
-plt.plot(epochs, smooth_curve(loss), "b", label="Smoothed validation loss")
+plt.plot(epochs, smooth_curve(val_loss), "b", label="Smoothed validation loss")
 plt.title("Training and validation loss")
 plt.legend()
 
 plt.show()
 
-#テストデータで評価する
+# テストデータで評価する
 test_generator = test_datagen.flow_from_directory(
     test_dir,
     target_size=(150, 150),
