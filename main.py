@@ -210,6 +210,9 @@ history = model.fit_generator(train_generator,
                               validation_data=validation_generator,
                               validation_steps=50)
 
+# モデルを保存
+model.save("cats_and_dogs_small_transfer_learning_fit_dense_overall_optimization_and_fine_tuning.h5")
+
 # 訓練時の損失値と正解率をプロット（指数移動平均を使ってグラフを滑らかにする）
 acc = history.history["acc"]
 val_acc = history.history["val_acc"]
