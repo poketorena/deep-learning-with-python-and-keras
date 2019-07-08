@@ -247,6 +247,7 @@ plt.legend()
 
 plt.show()
 
+#テストデータで評価する
 test_generator = test_datagen.flow_from_directory(
     test_dir,
     target_size=(150, 150),
