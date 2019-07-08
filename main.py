@@ -243,3 +243,14 @@ plt.title("Training and validation loss")
 plt.legend()
 
 plt.show()
+
+test_generator = test_datagen.flow_from_directory(
+    test_dir,
+    target_size=(150, 150),
+    batch_size=20,
+    class_mode="binary"
+)
+
+test_loss = test_acc = model.evaluate_generator(test_generator, steps=50)
+print(f"test loss: {test_loss}")
+print(f"test acc: {test_acc}")
