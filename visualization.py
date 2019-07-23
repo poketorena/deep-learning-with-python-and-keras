@@ -53,7 +53,23 @@ def generate_pattern(layer_name, filter_index, size=150):
 
 
 # mainプログラム
-layers = ["block1_conv1", "block2_conv1", "block3_conv1", "block4_conv1"]
+layers = ["block1_conv1",
+          "block1_conv2",
+
+          "block2_conv1",
+          "block2_conv2",
+
+          "block3_conv1",
+          "block3_conv2",
+          "block3_conv3",
+
+          "block4_conv1",
+          "block4_conv2",
+          "block4_conv3",
+
+          "block5_conv1",
+          "block5_conv2",
+          "block5_conv3", ]
 for layer_name in layers:
     size = 64
     margin = 5
