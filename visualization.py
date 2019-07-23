@@ -91,5 +91,7 @@ for layer_name in layers:
 
     # resultsグリッドを表示
     plt.figure(figsize=(20, 20))
+    plt.title(layer_name)
     plt.imshow(results)
+    plt.savefig(layer_name)
     plt.show()
