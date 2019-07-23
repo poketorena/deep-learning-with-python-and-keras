@@ -5,6 +5,7 @@ from keras.applications import VGG16
 from keras import backend as K
 
 model = VGG16(weights="imagenet", include_top=False)
+model.summary()
 
 
 def deprocess_image(x):
@@ -52,5 +53,27 @@ def generate_pattern(layer_name, filter_index, size=150):
 
 
 # mainプログラム
-plt.imshow(generate_pattern("block3_conv1", 0))
-plt.show()
+layers = ["block1_conv1", "block2_conv1", "block3_conv1", "block4_conv1"]
+for layer_name in layers:
+    size = 64
+    margin = 5
+
+    # 結果を格納する空（黒）の画像
+    results = np.zeros((8 * size + 7 * margin, 8 * size + 7 * margin, 3), dtype=np.uint8)
+
+    for i in range(8):  # resultsグリッドの行を順番に処理
+        for j in range(8):  # resultsグリッドの列を順番に処理
+            # layer_nameのフィルタi+(j*8)のパターンを生成
+            filter_img = generate_pattern(layer_name, i + (j * 8), size=size)
+
+            # resultsグリッドの短形（i, j）に結果を配置
+            horizontal_start = i * size + i * margin
+            horizontal_end = horizontal_start + size
+            vertical_start = j * size + j * margin
+            vertical_end = vertical_start + size
+            results[horizontal_start:horizontal_end, vertical_start:vertical_end, :] = filter_img
+
+    # resultsグリッドを表示
+    plt.figure(figsize=(20, 20))
+    plt.imshow(results)
+    plt.show()
