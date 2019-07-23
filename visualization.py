@@ -1,43 +1,10 @@
 # フィルタを可視化するための損失テンソルの定義
+import numpy as np
+import matplotlib.pyplot as plt
 from keras.applications import VGG16
 from keras import backend as K
 
 model = VGG16(weights="imagenet", include_top=False)
-
-layer_name = "block3_conv1"
-filter_index = 0
-
-layer_output = model.get_layer(layer_name).output
-loss = K.mean(layer_output[:, :, :, filter_index])
-
-# 入力に関する損失関数の勾配を取得
-# gradientsの呼び出しはテンソル（この場合はサイズ1）のリストを返す
-# このため、最初の要素（テンソル）だけを保持する
-grads = K.gradients(loss, model.input)[0]
-
-# 勾配の正規化
-# 除算の前に1e-5を足すことで、0による除算を回避
-grads /= (K.sqrt(K.mean(K.square(grads))) + 1e-5)
-
-# 入力値をNumPy配列で受け取り、出力値をNumPy配列で返す関数
-iterate = K.function([model.input], [loss, grads])
-
-# さっそくテストしてみる
-import numpy as np
-
-loss_value, grads_value = iterate([np.zeros((1, 150, 150, 3))])
-
-# 確率的勾配降下法を使って損失値を最大化
-# 最初はノイズが含まれたグレースケール画像を使用
-input_img_data = np.random.random((1, 150, 150, 3)) * 20 + 128.
-
-# 勾配上昇法を40ステップ実行
-step = 1.  # 各勾配更新の大きさ
-for i in range(40):
-    # 損失値と勾配値を計算
-    loss_value, grads_value = iterate([input_img_data])
-    # 損失が最大になる方向に入力画像を調整
-    input_img_data += grads_value * step
 
 
 def deprocess_image(x):
@@ -56,9 +23,34 @@ def deprocess_image(x):
     return x
 
 
-result = deprocess_image(input_img_data[0])
+def generate_pattern(layer_name, filter_index, size=150):
+    # ターゲット層のn番目のフィルタの活性化を最大化する損失関数を構築
+    layer_output = model.get_layer(layer_name).output
+    loss = K.mean(layer_output[:, :, :, filter_index])
 
-import matplotlib.pyplot as plt
+    # この損失関数を使って入力画像の勾配を計算
+    grads = K.gradients(loss, model.input)[0]
 
-plt.imshow(result)
+    # 正規化トリック：勾配を正規化
+    grads /= (K.sqrt(K.mean(K.square(grads))) + 1e-5)
+
+    # 入力画像に基づいて損失値と勾配値を返す関数
+    iterate = K.function([model.input], [loss, grads])
+
+    # 最初はノイズが含まれたグレースケール画像を使用
+    input_img_data = np.random.random((1, size, size, 3)) * 20 + 128.
+
+    # 勾配上昇法を40ステップ実行
+    step = 1.
+
+    for i in range(40):
+        loss_value, grads_value = iterate([input_img_data])
+        input_img_data += grads_value * step
+
+    img = input_img_data[0]
+    return deprocess_image(img)
+
+
+# mainプログラム
+plt.imshow(generate_pattern("block3_conv1", 0))
 plt.show()
