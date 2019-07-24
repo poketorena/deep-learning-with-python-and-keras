@@ -3,6 +3,7 @@ from keras.preprocessing import image
 from keras.applications.vgg16 import preprocess_input, decode_predictions
 from keras import backend as K
 import numpy as np
+import cv2
 import matplotlib.pyplot as plt
 
 # 出力層に全結合分類器が含まれていることに注意
@@ -71,3 +72,20 @@ heatmap = np.maximum(heatmap, 0)
 heatmap /= np.max(heatmap)
 plt.matshow(heatmap)
 plt.show()
+
+# cv2を使って元の画像を読み込む
+img = cv2.imread(img_path)
+
+# 元の画像と同じサイズになるようにヒートマップのサイズを変換
+heatmap = cv2.resize(heatmap, (img.shape[1], img.shape[0]))
+# ヒートマップをRGBに変換
+heatmap = np.uint8(255 * heatmap)
+
+# ヒートマップを元の画像に適用
+heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
+
+# 0.4はヒートマップの強度係数
+superimposed_img = heatmap * 0.4 + img
+
+# 画像をディスクに保存
+cv2.imwrite("./elephant_cam.jpg", superimposed_img)
