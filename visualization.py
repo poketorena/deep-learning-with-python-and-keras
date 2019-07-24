@@ -13,6 +13,8 @@ img_path = "./creative_commons_elephant.jpg"
 # ターゲット画像を読み込む：imgはサイズが224x224のPIL画像
 img = image.load_img(img_path, target_size=(224, 224))
 
+# VGG16モデルに合わせて入力画像を前処理
+
 # xは形状が(224, 224, 3)のfloat32型のNumPy配列
 x = image.img_to_array(img)
 
